@@ -4,9 +4,9 @@
 using namespace std;
 
 const int NUM_CASILLAS = 63;
-const list<int> CASILLAS_OCA {5, 9, 14, 18, 23, 27, 32, 36, 41, 45, 50, 54, 59, 63};
-const list<int> CASILLAS_PUENTE = {6, 12};
-const list<int> CASILLAS_DADOS = {26, 53};
+const list<int> CASILLAS_OCA{ 5, 9, 14, 18, 23, 27, 32, 36, 41, 45, 50, 54, 59, 63 };
+const list<int> CASILLAS_PUENTE = { 6, 12 };
+const list<int> CASILLAS_DADOS = { 26, 53 };
 const int CASILLA_POSADA = 19;
 const int CASILLA_PRISION = 52;
 const int CASILLA_POZO = 31;
@@ -88,5 +88,5 @@ bool esMeta(int casilla) {
 }
 
 int siguienteOca(int casilla) {
-	
+
 }
