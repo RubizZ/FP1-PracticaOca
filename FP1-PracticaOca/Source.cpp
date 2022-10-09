@@ -1,8 +1,8 @@
 #include <iostream>
-#include <array>
+//#include <array>
 #include <cstdlib>
 #include <ctime>
-#define sizeOf(type) ((char *)(&type+1)-(char*)(&type))
+//#define sizeOf(type) ((char *)(&type+1)-(char*)(&type))
 
 using namespace std;
 
@@ -25,8 +25,8 @@ const int TURNOS_POZO = -3;
 bool esOca(int casilla) {
 	int i = 0;
 	bool condicion = false;
-	while (i < sizeOf(CASILLAS_OCA)) {
-		if (CASILLAS_OCA[i] != casilla) {
+	while (i < 14) { // No llega a la ultima oca
+		if (CASILLAS_OCA[i] == casilla) {
 			condicion = true;
 		}
 		i++;
@@ -36,8 +36,8 @@ bool esOca(int casilla) {
 bool esPuente(int casilla) {
 	int i = 0;
 	bool condicion = false;
-	while (i < sizeOf(CASILLAS_PUENTE)) {
-		if (CASILLAS_PUENTE[i] != casilla) {
+	while (i < 2) {
+		if (CASILLAS_PUENTE[i] == casilla) {
 			condicion = true;
 		}
 		i++;
@@ -47,8 +47,8 @@ bool esPuente(int casilla) {
 bool esDados(int casilla) {
 	int i = 0;
 	bool condicion = false;
-	while (i < sizeOf(CASILLAS_DADOS)) {
-		if (CASILLAS_DADOS[i] != casilla) {
+	while (i < 2) {
+		if (CASILLAS_DADOS[i] == casilla) {
 			condicion = true;
 		}
 		i++;
@@ -105,9 +105,9 @@ bool esMeta(int casilla) {
 }
 
 int siguienteOca(int casilla) {
+	int i = 0;
 	int siguiente = 0;
-	array<int, 14> CASILLAS_OCA;
-	while (int i = 0 < CASILLAS_OCA.size()) {
+	while (i < 14) {
 		if (CASILLAS_OCA[i] == casilla) {
 			siguiente = CASILLAS_OCA[i + 1];
 		}
@@ -116,42 +116,35 @@ int siguienteOca(int casilla) {
 	return siguiente;
 }
 int siguientePuente(int casilla) {
+	int i = 0;
 	int siguiente = 0;
-	array<int, 2> CASILLAS_PUENTE;
-	while (int i = 0 < CASILLAS_PUENTE.size() - 1) {
+	while (i < 2) {
 		if (CASILLAS_PUENTE[i] == casilla) {
-			siguiente = CASILLAS_PUENTE[i + 1];
+			if (i != 1) {
+				siguiente = CASILLAS_PUENTE[(i + 1)];
+			}
+			else {
+				siguiente = CASILLAS_PUENTE[(i - 1)];
+			}
 		}
 		i++;
-	}
-	if (siguiente == casilla) {
-		while (int i = CASILLAS_PUENTE.size() > 1) {
-			if (CASILLAS_PUENTE[i] == casilla) {
-				siguiente = CASILLAS_PUENTE[i + 1];
-			}
-			i--;
-		}
 	}
 	return siguiente;
 }
 int siguienteDados(int casilla) {
+	int i = 0;
 	int siguiente = 0;
-	array<int, 2> CASILLAS_DADO;
-	while (int i = 0 < CASILLAS_DADO.size()) {
-		if (CASILLAS_DADO[i] == casilla) {
-			siguiente = CASILLAS_DADO[i + 1];
+	while (i < 2) {
+		if (CASILLAS_DADOS[i] == casilla) {
+			if (i != 1) {
+				siguiente = CASILLAS_DADOS[(i + 1)];
+			}
+			else {
+				siguiente = CASILLAS_DADOS[(i - 1)];
+			}
 		}
 		i++;
 	}
-	if (siguiente == casilla) {
-		while (int i = CASILLAS_DADO.size() > 1) {
-			if (CASILLAS_DADO[i] == casilla) {
-				siguiente = CASILLAS_DADO[i + 1];
-			}
-			i--;
-		}
-	}
-	
 	return siguiente;
 }
 int siguienteLaberinto(int casilla) {
@@ -164,6 +157,9 @@ int siguienteMuerte(int casilla) {
 }
 
 int tirarDado() {
+	int i;
+	cout << endl << "Pulsa enter para tirar el dado";
+	i = getc(stdin);
 	int dado = (rand() % 6) + 1;
 	return dado;
 }
@@ -180,45 +176,51 @@ int quienEmpieza() {
 int efectoPosicion(int casillaActual) {
 	int siguiente;
 	cout << "Te has movido a la casilla: " << casillaActual << endl;
-	if (esOca(casillaActual) == true && esOca(casillaActual) != esMeta(casillaActual)) {
+	if (esOca(casillaActual) == true) {
 		cout << "De oca a oca y tiro por que me toca" << endl;
 		siguiente = siguienteOca(casillaActual);
+		cout << "Has llegado a la casilla: " << siguiente << endl;
 	} 
 	else if (esPuente(casillaActual) == true) {
 		cout << "De puente a puente y tiro porque me lleva la corriente" << endl;
 		siguiente = siguientePuente(casillaActual);
+		cout << "Has llegado a la casilla: " << siguiente << endl;
 	} 
 	else if (esLaberinto(casillaActual) == true) {
+		cout << "Has caido en el laberinto" << endl;
 		siguiente = siguienteLaberinto(casillaActual);
+		cout << "Has llegado a la casilla: " << siguiente << endl;
 	} 
 	else if (esMuerte(casillaActual) == true) {
+		cout << "Has caido en la muerte" << endl;
 		siguiente = siguienteMuerte(casillaActual);
+		cout << "Has llegado a la casilla: " << siguiente << endl;
 	}
 	else if (esDados(casillaActual) == true) {
 		cout << "De dado a dado y tiro porque me ha tocado" << endl;
 		siguiente = siguienteDados(casillaActual);
+		cout << "Has llegado a la casilla: " << siguiente << endl;
 	}
 	else siguiente = casillaActual;
-	cout << "Has llegado a la casilla: " << siguiente << endl;
 
 	return siguiente;
 }
 int efectoTiradas(int casillaActual, int numeroDeTiradas) {
 	int numeroActualizado;
-	if ((esOca(casillaActual) == true && esOca(casillaActual) != esMeta(casillaActual)) || esPuente(casillaActual) == true || esDados(casillaActual) == true) {
+	if (esOca(casillaActual) == true || esPuente(casillaActual) == true || esDados(casillaActual) == true) {
 		cout << "Vuelves a tirar" << endl;
 		numeroActualizado = numeroDeTiradas + TURNOS_OCA_PUENTE_DADOS;
 	}
 	else if (esPosada(casillaActual) == true) {
-		cout << "No tiras en 1 turno" << endl;
+		cout << "Has caido en la posada" << endl << "No tiras en 1 turno" << endl;
 		numeroActualizado = numeroDeTiradas + TURNOS_POSADA;
 	}
 	else if (esPrision(casillaActual) == true) {
-		cout << "No tiras en 2 turnos" << endl;
+		cout << "Has caido en la prision" << endl << "No tiras en 2 turnos" << endl;
 		numeroActualizado = numeroDeTiradas + TURNOS_PRISION;
 	}
 	else if (esPozo(casillaActual) == true) {
-		cout << "No tiras en 3 turnos" << endl;
+		cout << "Has caido en el pozo" << endl << "No tiras en 3 turnos" << endl;
 		numeroActualizado = numeroDeTiradas + TURNOS_POZO;
 	}
 	else numeroActualizado = numeroDeTiradas;
@@ -229,21 +231,15 @@ int main() {
 	
 	srand(time(NULL));
 	
-	bool inicio = true;
 	int dado;
 	int turnoDe = quienEmpieza();
+	cout << "Empieza el jugador " << turnoDe << endl;
+
 	int casillaJ1 = 1, casillaJ2 = 1;
 	int tiradasJ1 = 1, tiradasJ2 = 1;
 	bool final = false;
 
 	while (final == false) {
-		if (inicio == false) {
-			cout << endl << "Es el turno del jugador " << turnoDe << endl;
-		}
-		else {
-			cout << "Empieza el jugador " << turnoDe << endl;
-			inicio = false;
-		}
 		while (turnoDe == 1) {
 
 			if (MODO_DEBUG == false) {
@@ -255,6 +251,10 @@ int main() {
 
 			tiradasJ1--;
 
+			if (tiradasJ2 <= 0) {
+				tiradasJ2++;
+			}
+
 			cout << "Has sacado un " << dado << endl;
 
 			casillaJ1 += dado;
@@ -262,18 +262,23 @@ int main() {
 
 			tiradasJ1 = efectoTiradas(casillaJ1, tiradasJ1);
 
-			if (tiradasJ2 <= 0) {
+			while (tiradasJ1 <= 0 && tiradasJ2 <= 0) {
+				tiradasJ1++;
 				tiradasJ2++;
 			}
-			if (tiradasJ1 <= 0) {
+
+			if (tiradasJ1 <= 0 && tiradasJ2 >= 1) {
 				turnoDe = 2;
+				cout << endl << endl << "Es el turno del jugador " << turnoDe << endl;
 			}
+	
 			if (esMeta(casillaJ1) == true) {
 				cout << "Ha ganado el jugador 1" << endl;
 				final = true;
 				turnoDe = 0;
 			}
 		}
+		
 		while (turnoDe == 2) {
 
 			if (MODO_DEBUG == false) {
@@ -285,6 +290,10 @@ int main() {
 
 			tiradasJ2--;
 
+			if (tiradasJ1 <= 0) {
+				tiradasJ1++;
+			}
+
 			cout << "Has sacado un " << dado << endl;
 
 			casillaJ2 += dado;
@@ -292,12 +301,16 @@ int main() {
 
 			tiradasJ2 = efectoTiradas(casillaJ2, tiradasJ2);
 
-			if (tiradasJ1 <= 0) {
+			while (tiradasJ1 <= 0 && tiradasJ2 <= 0) {
 				tiradasJ1++;
+				tiradasJ2++;
 			}
-			if (tiradasJ2 <= 0) {
+
+			if (tiradasJ2 <= 0 && tiradasJ1 >= 1) {
 				turnoDe = 1;
+				cout << endl << endl << "Es el turno del jugador " << turnoDe << endl;
 			}
+
 			if (esMeta(casillaJ2) == true) {
 				cout << "Ha ganado el jugador 2" << endl;
 				final = true;
@@ -309,8 +322,6 @@ int main() {
 
 /*
 
-- Arreglar esOca esPuente esDados
-- Arreglar siguienteOca siguientePuente siguienteDados
-- Probar los turnos
+- Comprobar que funciona bien cuando los dos tienen turnos negativos 
 
 */
