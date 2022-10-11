@@ -319,9 +319,3 @@ int main() {
 		}
 	}
 }
-
-/*
-
-- Comprobar que funciona bien cuando los dos tienen turnos negativos 
-
-*/
