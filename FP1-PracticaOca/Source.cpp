@@ -3,23 +3,9 @@
 #include <ctime>
 using namespace std;
 
+const bool MODO_DEBUG = true;
+
 const int NUM_CASILLAS = 63;
-/*
-const int casilla_oca_1 = 5;
-const int casilla_oca_2 = 9;
-const int casilla_oca_3 = 14;
-const int casilla_oca_4 = 18;
-const int casilla_oca_5 = 23;
-const int casilla_oca_6 = 27;
-const int casilla_oca_7 = 32;
-const int casilla_oca_8 = 36;
-const int casilla_oca_9 = 41;
-const int casilla_oca_10 = 45;
-const int casilla_oca_11 = 50;
-const int casilla_oca_12 = 54;
-const int casilla_oca_13 = 59;
-const int casilla_oca_14 = 63;
-*/
 const int TURNOS_OCA = 1;
 const int CASILLA_PUENTE_1 = 6;
 const int CASILLA_PUENTE_2 = 12;
@@ -37,7 +23,7 @@ const int CASILLA_LABERINTO = 42;
 const int CASILLA_MUERTE = 58;
 
 
-bool esOca(int casilla);//FUNCIONES
+bool esOca(int casilla);
 bool esPuente(int casilla);
 bool esDados(int casilla);
 bool esLaberinto(int casilla);
@@ -59,6 +45,43 @@ int efectoTiradas(int casillaActual, int numeroDeTiradas);
 
 int main() {
 	srand(time(NULL));
+	int casillaJ1 = 1, casillaJ2 = 1;
+	int numeroDeTiradas = 1;
+	int casillaActual = 1;
+	int dado;
+	int turno =	quienEmpieza();
+	
+	while (casillaActual != 63) {
+		cout << "Es el turno del jugador " << turno << endl << endl;
+		while (numeroDeTiradas >= 1) {
+			numeroDeTiradas--;
+			if (MODO_DEBUG == false) {
+				dado = tirarDado();
+			}
+			else dado = tirarDadoManual();
+			if (casillaActual + dado < 63) {
+				casillaActual += dado;
+			}
+			else casillaActual = 63 - (dado - (63 - casillaActual));
+
+			casillaActual = efectoPosicion(casillaActual);
+			numeroDeTiradas = efectoTiradas(casillaActual, numeroDeTiradas);
+		}
+		if (turno == 1 && casillaActual != 63) {
+			casillaJ1 = casillaActual;
+			turno = 2;
+			casillaActual = casillaJ2;
+			numeroDeTiradas = 1 - numeroDeTiradas;
+		}
+		else if (turno == 2 && casillaActual != 63) {
+			casillaJ2 = casillaActual;
+			turno = 1;
+			casillaActual = casillaJ1;
+			numeroDeTiradas = 1 - numeroDeTiradas;
+		}
+	}
+	cout << endl << "El ganador es el jugador " << turno << endl;
+	return 0;
 }
 
 bool esOca(int casilla) {
@@ -220,73 +243,56 @@ int efectoPosicion(int casillaActual) {
 		siguiente = siguienteOca(casillaActual);
 		cout << "Has llegado a la casilla: " << siguiente << endl;
 	}
-	else {
-		if (esPuente(casillaActual) == true) {
-			cout << "De puente a puente y tiro porque me lleva la corriente" << endl;
-			siguiente = siguientePuente(casillaActual);
-			cout << "Has llegado a la casilla: " << siguiente << endl;
-		}
-		else {
-			if (esLaberinto(casillaActual) == true) {
-				cout << "Has caido en el laberinto" << endl;
-				siguiente = siguienteLaberinto(casillaActual);
-				cout << "Has llegado a la casilla: " << siguiente << endl;
-			}
-			else {
-				if (esMuerte(casillaActual) == true) {
-					cout << "Has caido en la muerte" << endl;
-					siguiente = siguienteMuerte(casillaActual);
-					cout << "Has llegado a la casilla: " << siguiente << endl;
-				}
-				else {
-					if (esDados(casillaActual) == true) {
-						cout << "De dado a dado y tiro porque me ha tocado" << endl;
-						siguiente = siguienteDado(casillaActual);
-						cout << "Has llegado a la casilla: " << siguiente << endl;
-					}
-					else { siguiente = casillaActual; }
-				}
-			}
-		}
+	else if (esPuente(casillaActual) == true) {
+		cout << "De puente a puente y tiro porque me lleva la corriente" << endl;
+		siguiente = siguientePuente(casillaActual);
+		cout << "Has llegado a la casilla: " << siguiente << endl;
 	}
+	else if (esLaberinto(casillaActual) == true) {
+		cout << "Has caido en el laberinto" << endl;
+		siguiente = siguienteLaberinto(casillaActual);
+		cout << "Has llegado a la casilla: " << siguiente << endl;
+	}
+	else if (esMuerte(casillaActual) == true) {
+		cout << "Has caido en la muerte" << endl;
+		siguiente = siguienteMuerte(casillaActual);
+		cout << "Has llegado a la casilla: " << siguiente << endl;
+	}
+	else if (esDados(casillaActual) == true) {
+		cout << "De dado a dado y tiro porque me ha tocado" << endl;
+		siguiente = siguienteDado(casillaActual);
+		cout << "Has llegado a la casilla: " << siguiente << endl;
+	}
+	else siguiente = casillaActual;
+	cout << endl;
 	return siguiente;
 }
 int efectoTiradas(int casillaActual, int numeroDeTiradas) {
 	int numeroActualizado;
-	if (esOca(casillaActual) == true) {
+	if (esOca(casillaActual) == true && casillaActual != 63) {
 		cout << "Vuelves a tirar" << endl;
 		numeroActualizado = numeroDeTiradas + TURNOS_OCA;
 	}
-	else {
-		if (esPuente(casillaActual) == true) {
-			cout << "Vuelves a tirar" << endl;
-			numeroActualizado = numeroDeTiradas + TURNOS_PUENTE;
-		}
-		else {
-			if (esDados(casillaActual) == true) {
-				cout << "Vuelves a tirar" << endl;
-				numeroActualizado = numeroDeTiradas + TURNOS_DADOS;
-			}
-			else {
-				if (esPosada(casillaActual) == true) {
-					cout << "Has caido en la posada" << endl << "No tiras en 1 turno" << endl;
-					numeroActualizado = numeroDeTiradas + TURNOS_POSADA;
-				}
-				else {
-					if (esPrision(casillaActual) == true) {
-						cout << "Has caido en la prision" << endl << "No tiras en 2 turnos" << endl;
-						numeroActualizado = numeroDeTiradas + TURNOS_PRISION;
-					}
-					else {
-						if (esPozo(casillaActual) == true) {
-							cout << "Has caido en el pozo" << endl << "No tiras en 3 turnos" << endl;
-							numeroActualizado = numeroDeTiradas + TURNOS_POZO;
-						}
-						else numeroActualizado = numeroDeTiradas;
-					}
-				}
-			}
-		}
+	else if (esPuente(casillaActual) == true) {
+		cout << "Vuelves a tirar" << endl;
+		numeroActualizado = numeroDeTiradas + TURNOS_PUENTE;
 	}
+	else if (esDados(casillaActual) == true) {
+		cout << "Vuelves a tirar" << endl;
+		numeroActualizado = numeroDeTiradas + TURNOS_DADOS;
+	}
+	else if (esPosada(casillaActual) == true) {
+		cout << "Has caido en la posada" << endl << "No tiras en 1 turno" << endl;
+		numeroActualizado = numeroDeTiradas + TURNOS_POSADA;
+	}
+	else if (esPrision(casillaActual) == true) {
+		cout << "Has caido en la prision" << endl << "No tiras en 2 turnos" << endl;
+		numeroActualizado = numeroDeTiradas + TURNOS_PRISION;
+	}
+	else if (esPozo(casillaActual) == true) {
+		cout << "Has caido en el pozo" << endl << "No tiras en 3 turnos" << endl;
+		numeroActualizado = numeroDeTiradas + TURNOS_POZO;
+	}
+	else numeroActualizado = numeroDeTiradas;
 	return numeroActualizado;
 }
