@@ -3,7 +3,7 @@
 #include <ctime>
 using namespace std;
 
-const bool MODO_DEBUG = true;
+const bool MODO_DEBUG = false;
 
 const int NUM_CASILLAS = 63;
 const int TURNOS_OCA = 1;
