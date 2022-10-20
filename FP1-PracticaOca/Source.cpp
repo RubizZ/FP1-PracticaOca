@@ -219,11 +219,11 @@ int siguienteMuerte(int casilla) {
 }
 
 int tirarDado() {
-	
+	/*
 	int i;
 	cout << endl << "Pulsa enter para tirar el dado";
 	i = getc(stdin);
-	
+	*/
 	int dado = (rand() % 6) + 1;
 	return dado;
 }
