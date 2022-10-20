@@ -51,8 +51,10 @@ int main() {
 	int dado;
 	int turno =	quienEmpieza();
 	
+	cout << "JUEGO DE LA OCA"
+
 	while (casillaActual != 63) {
-		cout << "Es el turno del jugador " << turno << endl << endl;
+		cout << endl << "Es el turno del jugador " << turno << endl;
 		while (numeroDeTiradas >= 1) {
 			numeroDeTiradas--;
 			if (MODO_DEBUG == false) {
@@ -217,11 +219,11 @@ int siguienteMuerte(int casilla) {
 }
 
 int tirarDado() {
-	/*
+	
 	int i;
 	cout << endl << "Pulsa enter para tirar el dado";
 	i = getc(stdin);
-	*/
+	
 	int dado = (rand() % 6) + 1;
 	return dado;
 }
