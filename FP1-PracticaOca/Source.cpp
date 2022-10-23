@@ -49,7 +49,7 @@ int main() {
 	int numeroDeTiradas = 1;
 	int casillaActual = 1;
 	int dado;
-	int turno =	quienEmpieza();
+	int turno = quienEmpieza();
 	
 	cout << "JUEGO DE LA OCA"
 
@@ -57,25 +57,29 @@ int main() {
 		cout << endl << "Es el turno del jugador " << turno << endl;
 		while (numeroDeTiradas >= 1) {
 			numeroDeTiradas--;
-			if (MODO_DEBUG == false) {
-				dado = tirarDado();
+			
+			//Modo debug del dado
+			if (MODO_DEBUG) {
+				dado = tirarDadoManual();
 			}
-			else dado = tirarDadoManual();
-			if (casillaActual + dado < 63) {
+			else dado = tirarDado();
+			
+			//Comprobar que el dado se ha pasado la meta para volver para atras
+			if (casillaActual + dado < NUM_CASILLAS) {
 				casillaActual += dado;
 			}
-			else casillaActual = 63 - (dado - (63 - casillaActual));
+			else casillaActual = NUM_CASILLAS - (dado - (NUM_CASILLAS - casillaActual));
 
 			casillaActual = efectoPosicion(casillaActual);
 			numeroDeTiradas = efectoTiradas(casillaActual, numeroDeTiradas);
 		}
-		if (turno == 1 && casillaActual != 63) {
+		if (turno == 1 && casillaActual != NUM_CASILLAS) {
 			casillaJ1 = casillaActual;
 			turno = 2;
 			casillaActual = casillaJ2;
 			numeroDeTiradas = 1 - numeroDeTiradas;
 		}
-		else if (turno == 2 && casillaActual != 63) {
+		else if (turno == 2 && casillaActual != NUM_CASILLAS) {
 			casillaJ2 = casillaActual;
 			turno = 1;
 			casillaActual = casillaJ1;
