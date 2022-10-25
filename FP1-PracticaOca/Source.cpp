@@ -22,7 +22,6 @@ const int TURNOS_POZO = -3;
 const int CASILLA_LABERINTO = 42;
 const int CASILLA_MUERTE = 58;
 
-
 bool esOca(int casilla);
 bool esPuente(int casilla);
 bool esDados(int casilla);
@@ -42,6 +41,8 @@ int tirarDadoManual();
 int quienEmpieza();
 int efectoPosicion(int casillaActual);
 int efectoTiradas(int casillaActual, int numeroDeTiradas);
+int cambioDeTiradas(int numeroDeTiradas);
+
 
 int main() {
 	srand(time(NULL));
@@ -51,48 +52,56 @@ int main() {
 	int dado;
 	int turno = quienEmpieza();
 	
-	cout << "JUEGO DE LA OCA"
+	cout << "JUEGO DE LA OCA" << endl;
 
-	while (casillaActual != 63) {
-		cout << endl << "Es el turno del jugador " << turno << endl;
-		while (numeroDeTiradas >= 1) {
+	while (!esMeta(casillaActual)) {
+		cout << "--------------------------" << endl << "Es el turno del jugador " << turno << endl;
+		while (numeroDeTiradas >= 1 && !esMeta(casillaActual)) {
 			numeroDeTiradas--;
-			
+
 			//Modo debug del dado
 			if (MODO_DEBUG) {
 				dado = tirarDadoManual();
 			}
 			else dado = tirarDado();
-			
+			/*
 			//Comprobar que el dado se ha pasado la meta para volver para atras
 			if (casillaActual + dado < NUM_CASILLAS) {
 				casillaActual += dado;
 			}
 			else casillaActual = NUM_CASILLAS - (dado - (NUM_CASILLAS - casillaActual));
-
+			*/
+			casillaActual += dado;
 			casillaActual = efectoPosicion(casillaActual);
 			numeroDeTiradas = efectoTiradas(casillaActual, numeroDeTiradas);
 		}
-		if (turno == 1 && casillaActual != NUM_CASILLAS) {
-			casillaJ1 = casillaActual;
-			turno = 2;
-			casillaActual = casillaJ2;
-			numeroDeTiradas = 1 - numeroDeTiradas;
-		}
-		else if (turno == 2 && casillaActual != NUM_CASILLAS) {
-			casillaJ2 = casillaActual;
-			turno = 1;
-			casillaActual = casillaJ1;
-			numeroDeTiradas = 1 - numeroDeTiradas;
+		
+		if (!esMeta(casillaActual)) {
+			
+			//Cambia de tiradas de un jugador a otro segun las tiradas de penalizacion que tenga
+			numeroDeTiradas = cambioDeTiradas(numeroDeTiradas);
+
+			if (turno == 1) {
+				turno = 2;
+				casillaJ1 = casillaActual;
+				casillaActual = casillaJ2;
+			}
+			else if (turno == 2) {
+				turno = 1;
+				casillaJ2 = casillaActual;
+				casillaActual = casillaJ1;
+			}
 		}
 	}
-	cout << endl << "El ganador es el jugador " << turno << endl;
+	cout << "************************************************************";
+	cout << endl << "**************** El ganador es el jugador " << turno << " ****************" << endl;
+	cout << "************************************************************";
 	return 0;
 }
 
 bool esOca(int casilla) {
 	bool condicion;
-	if (casilla % 9 == 0 || casilla % 9 == 5) {
+	if ((casilla % 9 == 0 || casilla % 9 == 5)) {
 		condicion = true;
 	}
 	else {
@@ -223,12 +232,11 @@ int siguienteMuerte(int casilla) {
 }
 
 int tirarDado() {
-	/*
 	int i;
-	cout << endl << "Pulsa enter para tirar el dado";
+	cout << endl << "Pulsa enter para tirar el dado" << endl;
 	i = getc(stdin);
-	*/
 	int dado = (rand() % 6) + 1;
+	cout << "Has sacado un " << dado << endl;
 	return dado;
 }
 int tirarDadoManual() {
@@ -244,7 +252,7 @@ int quienEmpieza() {
 int efectoPosicion(int casillaActual) {
 	int siguiente;
 	cout << "Te has movido a la casilla: " << casillaActual << endl;
-	if (esOca(casillaActual) == true) {
+	if (esOca(casillaActual) == true && !esMeta(casillaActual)) {
 		cout << "De oca a oca y tiro por que me toca" << endl;
 		siguiente = siguienteOca(casillaActual);
 		cout << "Has llegado a la casilla: " << siguiente << endl;
@@ -301,4 +309,8 @@ int efectoTiradas(int casillaActual, int numeroDeTiradas) {
 	}
 	else numeroActualizado = numeroDeTiradas;
 	return numeroActualizado;
+}
+int cambioDeTiradas(int numeroDeTiradas) {
+	numeroDeTiradas = 1 - numeroDeTiradas;
+	return numeroDeTiradas;
 }
