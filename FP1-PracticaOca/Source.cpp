@@ -41,7 +41,7 @@ int tirarDadoManual();
 int quienEmpieza();
 int efectoPosicion(int casillaActual);
 int efectoTiradas(int casillaActual, int numeroDeTiradas);
-int cambioDeTiradas(int numeroDeTiradas);
+int cambioDeTurno(int casillaActual, int& casillaJ1, int& casillaJ2, int& turno, int& numeroDeTiradas);
 
 
 int main() {
@@ -78,19 +78,9 @@ int main() {
 		
 		if (!esMeta(casillaActual)) {
 			
-			//Cambia de tiradas de un jugador a otro segun las tiradas de penalizacion que tenga
-			numeroDeTiradas = cambioDeTiradas(numeroDeTiradas);
+			//Actualiza las casilla de los jugadores, cambia el turno y cambia de tiradas de un jugador a otro segun las tiradas de penalizacion que tenga
+			casillaActual = cambioDeTurno(casillaActual, casillaJ1, casillaJ2, turno, numeroDeTiradas);
 
-			if (turno == 1) {
-				turno = 2;
-				casillaJ1 = casillaActual;
-				casillaActual = casillaJ2;
-			}
-			else if (turno == 2) {
-				turno = 1;
-				casillaJ2 = casillaActual;
-				casillaActual = casillaJ1;
-			}
 		}
 	}
 	cout << "************************************************************";
@@ -310,7 +300,17 @@ int efectoTiradas(int casillaActual, int numeroDeTiradas) {
 	else numeroActualizado = numeroDeTiradas;
 	return numeroActualizado;
 }
-int cambioDeTiradas(int numeroDeTiradas) {
+int cambioDeTurno(int casillaActual, int& casillaJ1, int& casillaJ2, int& turno, int& numeroDeTiradas) {
+	if (turno == 1) {
+		casillaJ1 = casillaActual;
+		casillaActual = casillaJ2;
+		turno = 2;
+	}
+	else if (turno == 2) {
+		casillaJ2 = casillaActual;
+		casillaActual = casillaJ1;
+		turno = 1;
+	}
 	numeroDeTiradas = 1 - numeroDeTiradas;
-	return numeroDeTiradas;
+	return casillaActual;
 }
