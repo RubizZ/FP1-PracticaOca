@@ -34,17 +34,29 @@ string casillaAstring(tCasilla casilla);
 
 int tirarDado();
 int tirarDadoManual();
-int quienEmpieza(NUM_JUGADORES);
+int quienEmpieza(const int NUM_JUGADORES);
 
 void iniciaTablero(tTablero tablero);
 bool cargaTablero(tTablero tablero);
+tCasilla stringAtCasilla(string casilla);
 
 int main() {
     srand(time(NULL));
     tTablero tablero;
+    tJugadores casillasJugadores;
+    
+    for (int i = 0; i < NUM_JUGADORES; i++) {
+        casillasJugadores[i] = i;
+    }
+    
     iniciaTablero(tablero);
+    while (!cargaTablero(tablero))
+    cout << boolalpha << cargaTablero(tablero) << endl;
+    pintaTablero(tablero, casillasJugadores);
+    
 
     return 0;
+    
 }
 
 string casillaAstring(tCasilla casilla) {
@@ -164,6 +176,14 @@ if (casillaActual + dado < NUM_CASILLAS) {
 else casillaActual = NUM_CASILLAS - (dado - (NUM_CASILLAS - casillaActual));
 */
 
+/* Cout de todo el tTablero
+
+    for (int i = 0; i < CASILLA_META; i++) {
+        cout << i << " " << tablero[i] << endl;
+    }
+
+    */
+
 int tirarDado() {
     string i;
 
@@ -192,26 +212,49 @@ void iniciaTablero(tTablero tablero) { //Iniializa todo el tablero a normal exce
     for (int i = 0; i < CASILLA_META; i++) {
         tablero[i] = NORMAL;
     }
-
 }
 bool cargaTablero(tTablero tablero) { 
     ifstream archivo;
     string nombre;
     int posicion;
-    tCasilla() tipo;
+    string tipo;
+    tCasilla tipotCasilla;
     bool satisfactorio = false;
 
     cout << "Introduce el nombre del fichero del tablero" << endl;
     cin >> nombre;
     archivo.open(nombre);
+
     if (archivo.is_open()) {
         archivo >> posicion;
         while (posicion != CENTINELA) {
-            getline(archivo, tipo, '\n');
-            tablero[posicion - 1] = tipo; //Cambiar para otro dia de string a tCasilla
-            }
+            char aux;
+            archivo.get(aux);
+            getline(archivo, tipo);
+            tipotCasilla = stringAtCasilla(tipo);
+            //cout << posicion << " " << tipo << " " << tipotCasilla << endl;
+            tablero[posicion - 1] = tipotCasilla;
             archivo >> posicion;
         }
-    satisfactorio = true;
+        satisfactorio = true;
+        archivo.close();
     }
-    
+    return satisfactorio;
+}
+
+tCasilla stringAtCasilla(string casilla) {
+    tCasilla cadena = NORMAL;
+    if (casilla == "NORMAL") cadena = NORMAL;
+    else if (casilla == "OCA") cadena = OCA;
+    else if (casilla == "DADO1") cadena = DADO1;
+    else if (casilla == "DADO2") cadena = DADO2;
+    else if (casilla == "PUENTE1") cadena = PUENTE1;
+    else if (casilla == "PUENTE2") cadena = PUENTE2;
+    else if (casilla == "POSADA") cadena = POSADA;
+    else if (casilla == "CALAVERA") cadena = CALAVERA;
+    else if (casilla == "LABERINTO") cadena = LABERINTO;
+    else if (casilla == "POZO") cadena = POZO;
+    else if (casilla == "CARCEL") cadena = CARCEL;
+    //cout << casilla << " " << cadena << endl;
+    return cadena;
+}
