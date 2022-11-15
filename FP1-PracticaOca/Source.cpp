@@ -9,7 +9,7 @@ using namespace std;
 const int MODO_DEBUG = true;
 
 const int CASILLA_INICIAL = 1;
-const int CASILLA_META = 63;
+const int NUM_CASILLAS = 63;
 
 const int TURNOS_POSADA = 1;
 const int TURNOS_CARCEL = 2;
@@ -21,8 +21,13 @@ const int NUM_FILAS_A_DIBUJAR = 3;
 const int CENTINELA = 0;
 
 typedef enum { NORMAL, OCA, PUENTE1, PUENTE2, POZO, POSADA, LABERINTO, DADO1, DADO2, CARCEL, CALAVERA } tCasilla;
-typedef tCasilla tTablero[CASILLA_META];
+typedef tCasilla tTablero[NUM_CASILLAS];
 typedef int tJugadores[NUM_JUGADORES];
+
+//Subprogramas para cargar el tablero
+void iniciaTablero(tTablero tablero);
+bool cargaTablero(tTablero tablero);
+tCasilla stringAtCasilla(string casilla);
 
 //Subprogramas para pintar el tablero o mostrar informaci�n
 void pintaTablero(const tTablero tablero, const tJugadores casillasJ);
@@ -32,26 +37,27 @@ void pintaTipoCasilla(const tTablero tablero, int fila, int casillasPorFila);
 void pintaJugadores(const tJugadores casillasJ, int fila, int casillasPorFila);
 string casillaAstring(tCasilla casilla);
 
+//Subprogramas de la partida
 int tirarDado();
 int tirarDadoManual();
 int quienEmpieza(const int NUM_JUGADORES);
 
-void iniciaTablero(tTablero tablero);
-bool cargaTablero(tTablero tablero);
-tCasilla stringAtCasilla(string casilla);
 
 int main() {
     srand(time(NULL));
     tTablero tablero;
     tJugadores casillasJugadores;
     
+    //Situa a todos los jugadores en la casilla 1 (con index 0)
     for (int i = 0; i < NUM_JUGADORES; i++) {
-        casillasJugadores[i] = i;
+        casillasJugadores[i] = 0;
     }
     
+    //Inicializa el tablero a NORMAL y carga el tablero del archivo a introducir
     iniciaTablero(tablero);
     while (!cargaTablero(tablero))
-    cout << boolalpha << cargaTablero(tablero) << endl;
+    
+    
     pintaTablero(tablero, casillasJugadores);
     
 
@@ -95,7 +101,7 @@ string casillaAstring(tCasilla casilla) {
     return cadena;
 }
 void pintaTablero(const tTablero tablero, const tJugadores casillasJ) {
-    int casillasPorFila = CASILLA_META / NUM_FILAS_A_DIBUJAR; 
+    int casillasPorFila = NUM_CASILLAS / NUM_FILAS_A_DIBUJAR; 
     cout << endl;
     for (int fila = 0; fila < NUM_FILAS_A_DIBUJAR; fila++) {
         pintaBorde(casillasPorFila);
@@ -152,37 +158,6 @@ void pintaJugadores(const tJugadores casillasJ, int fila, int casillasPorFila) {
 
 }
 
-/* Funcion de cambio de turno y instrucciones volver para atras si se pasa la meta no usadas en la v1
-
-int cambioDeTurno(int casillaActual, int& casillaJ1, int& casillaJ2, int& turno, int& numeroDeTiradas) {	
-	if (turno == 1) {	
-		casillaJ1 = casillaActual;	
-		casillaActual = casillaJ2;	
-		turno = 2;	
-	}	
-	else if (turno == 2) {	
-		casillaJ2 = casillaActual;	
-		casillaActual = casillaJ1;	
-		turno = 1;	
-	}	
-	numeroDeTiradas = 1 - numeroDeTiradas;	
-	return casillaActual;	
-}
-
-//Comprobar que el dado se ha pasado la meta para volver para atras
-if (casillaActual + dado < NUM_CASILLAS) {
-	casillaActual += dado;
-}
-else casillaActual = NUM_CASILLAS - (dado - (NUM_CASILLAS - casillaActual));
-*/
-
-/* Cout de todo el tTablero
-
-    for (int i = 0; i < CASILLA_META; i++) {
-        cout << i << " " << tablero[i] << endl;
-    }
-
-    */
 
 int tirarDado() {
     string i;
@@ -198,20 +173,21 @@ int tirarDado() {
     return dado;
 }
 int tirarDadoManual() {
-    double dado = 0;
+    int dado = 0;
     cout << "Introduce el valor del dado: ";
     cin >> dado;
-    return int(dado); //Si el usuario escribe un numero decimal, se castea en uno entero para evitar errores
+    return dado;
 }
 int quienEmpieza(const int NUM_JUG) {
     int empieza = (rand() % NUM_JUG) + 1;
     return empieza;
 }
 
-void iniciaTablero(tTablero tablero) { //Iniializa todo el tablero a normal excepto NUM_CASILLAS-1 que es la OCA 63
-    for (int i = 0; i < CASILLA_META; i++) {
+void iniciaTablero(tTablero tablero) { //Inicializa todo el tablero a normal excepto NUM_CASILLAS-1 que es la OCA 63
+    for (int i = 0; i < NUM_CASILLAS - 1; i++) {
         tablero[i] = NORMAL;
     }
+    tablero[NUM_CASILLAS - 1] = OCA;
 }
 bool cargaTablero(tTablero tablero) { 
     ifstream archivo;
@@ -258,3 +234,55 @@ tCasilla stringAtCasilla(string casilla) {
     //cout << casilla << " " << cadena << endl;
     return cadena;
 }
+
+
+
+//-----------------------------------------CODIGO UTIL PARA USAR DESPUES-----------------------------------------//
+
+//Funcion de cambio de turno no usada en la v1
+/*
+
+int cambioDeTurno(int casillaActual, int& casillaJ1, int& casillaJ2, int& turno, int& numeroDeTiradas) {
+    if (turno == 1) {
+        casillaJ1 = casillaActual;
+        casillaActual = casillaJ2;
+        turno = 2;
+    }
+    else if (turno == 2) {
+        casillaJ2 = casillaActual;
+        casillaActual = casillaJ1;
+        turno = 1;
+    }
+    numeroDeTiradas = 1 - numeroDeTiradas;
+    return casillaActual;
+}
+
+*/
+
+//Comprobar que el dado se ha pasado la meta para volver para atras no usado en la v1
+/*
+
+if (casillaActual + dado < NUM_CASILLAS) {
+    casillaActual += dado;
+}
+else casillaActual = NUM_CASILLAS - (dado - (NUM_CASILLAS - casillaActual));
+
+*/
+
+//Cout de todo el tTablero
+/*
+
+for (int i = 0; i < NUM_CASILLAS; i++) {
+    cout << i << " " << tablero[i] << endl;
+}
+
+ */
+
+//Asigna la casilla i al jugador i
+/*
+
+for (int i = 0; i < NUM_JUGADORES; i++) {
+    casillasJugadores[i] = i;
+}
+
+*/
