@@ -198,7 +198,7 @@ bool cargaTablero(tTablero tablero) {
     ifstream archivo;
     string nombre;
     int posicion;
-    string tipo;
+    tCasilla() tipo;
     bool satisfactorio = false;
 
     cout << "Introduce el nombre del fichero del tablero" << endl;
@@ -210,7 +210,7 @@ bool cargaTablero(tTablero tablero) {
             getline(archivo, tipo, '\n');
             tablero[posicion - 1] = tipo; //Cambiar para otro dia de string a tCasilla
             }
-            cin >> posicion;
+            archivo >> posicion;
         }
     satisfactorio = true;
     }
