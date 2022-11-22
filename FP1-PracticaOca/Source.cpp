@@ -169,25 +169,27 @@ int partida(tTablero tablero, tCasilla jugadores, tCasilla penalizaciones) {
     pintaTablero();
 
     while (!finPartida) {        
-        if (penalizaciones[turno] <= 0) {
-            tirada(tablero, casillaActual, penalizaciones);
+        if (penalizaciones[turno] == 0) {
+            tirada(tablero, casillaActual);
             pintaTablero();
             
             if (casillaActual >= 63) finPartida = true;
         }
         else penalizaciones[turno]--;
         
-        if (turno != NUM_JUGADORES) {
-            turno++;
-            casillaActual = jugadores[turno];
+        if (!finPartida) {
+            if (turno != NUM_JUGADORES && !finPartida) {
+                turno++;
+                casillaActual = jugadores[turno];
+            }
+            else turno = 0;
         }
-        else turno = 0;
     }
     return turno;
 }
-void tirada(tTablero tablero, int& casillaActual, tTablero penalizaciones){
+int tirada(tTablero tablero, int& casillaActual){
 
-    int dado = 0;
+    int dado;
     int penalizacion = 0;
     
     //Tira dados
@@ -201,7 +203,7 @@ void tirada(tTablero tablero, int& casillaActual, tTablero penalizaciones){
     cout << "Has avanzado a la casilla " << casillaActual << endl;
 
     if (casillaActual < 63) {
-        penalizaciones = efectoTirada(tablero, casillaActual, penalizaciones);
+        penalizacion = efectoTirada(tablero, casillaActual);
     }
     
     return penalizacion;
@@ -214,27 +216,27 @@ int efectoTirada(tTablero tablero, int& casillaActual) {
     case OCA:
         cout << "De oca a oca y tiro porque me toca" << endl;
         cout << "Avanzas hasta la casilla " << casillaActual << endl;
-        tirada(tablero, casillaActual, penalizaciones);
+        tirada(tablero, casillaActual);
         break;
     case DADO1:
         cout << "De dado a dado y tiro porque me ha tocado" << endl;
         cout << "Avanzas hasta la casilla " << casillaActual << endl;
-        tirada(tablero, casillaActual, penalizaciones);
+        tirada(tablero, casillaActual);
         break;
     case DADO2:
         cout << "De dado a dado y tiro porque me ha tocado" << endl;
         cout << "Retrocedes hasta la casilla " << casillaActual << endl;
-        tirada(tablero, casillaActual, penalizaciones);
+        tirada(tablero, casillaActual);
         break;
     case PUENTE1:
         cout << "De puente a puente y tiro porque me lleva la corriente" << endl;
         cout << "Avanzas hasta la casilla " << casillaActual << endl;
-        tirada(tablero, casillaActual, penalizaciones);
+        tirada(tablero, casillaActual);
         break;
     case PUENTE2:
         cout << "De puente a puente y tiro porque me lleva la corriente" << endl;
         cout << "Retrocedes hasta la casilla " << casillaActual << endl;
-        tirada(tablero, casillaActual, penalizaciones);
+        tirada(tablero, casillaActual);
         break;
     case CALAVERA:
         cout << "Has caido en la muerte" << endl;
@@ -253,7 +255,6 @@ int efectoTirada(tTablero tablero, int& casillaActual) {
         cout << "Has caido en la carcel" << endl;
         cout << "Te quedas dos turnos sin jugar " << endl;
         penalizacion = TURNOS_CARCEL;
-
         break;
     case POZO:
         cout << "Has caido en el pozo" << endl;
