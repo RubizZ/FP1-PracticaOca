@@ -45,7 +45,9 @@ int saltaACasilla(tTablero tablero, int casillaActual);
 int buscaCasillaAvanzando(tTablero tablero, int casillaActual);
 int buscaCasillaRetrocediendo(tTablero tablero, int casillaActual);
 int efectoTirada(tTablero tablero, int& casillaActual);
-int iniciaJugadores(tJugadores jugadores, tJugadores penalizaciones);
+void iniciaJugadores(tJugadores jugadores, tJugadores penalizaciones);
+int partida(tTablero tablero, tJugadores jugadores, tJugadores penalizaciones);
+int tirada(tTablero tablero, int& casillaActual);
 
 
 int main() {
@@ -143,7 +145,7 @@ void pintaJugadores(const tJugadores casillasJ, int fila, int casillasPorFila) {
         casilla = i - 1 + fila * casillasPorFila;
         for (int jug = 0; jug < NUM_JUGADORES; jug++) {
             if (casillasJ[jug] == casilla)
-                cout << jug + 1; 
+                cout << jug + 1;
             else
                 cout << " ";
         }
@@ -153,6 +155,58 @@ void pintaJugadores(const tJugadores casillasJ, int fila, int casillasPorFila) {
     cout << endl;
 
 }
+
+void iniciaTablero(tTablero tablero) { //Inicializa todo el tablero a normal excepto NUM_CASILLAS-1 que es la OCA 63
+    for (int i = 0; i < NUM_CASILLAS - 1; i++) {
+        tablero[i] = NORMAL;
+    }
+    tablero[NUM_CASILLAS - 1] = OCA;
+}
+bool cargaTablero(tTablero tablero) {
+    ifstream archivo;
+    string nombre;
+    int posicion;
+    string tipo;
+    tCasilla tipotCasilla;
+    bool satisfactorio = false;
+
+    cout << "Introduce el nombre del fichero del tablero" << endl;
+    cin >> nombre;
+    archivo.open(nombre);
+
+    if (archivo.is_open()) {
+        archivo >> posicion;
+        while (posicion != CENTINELA) {
+            char aux;
+            archivo.get(aux);
+            getline(archivo, tipo);
+            tipotCasilla = stringAtCasilla(tipo);
+            //cout << posicion << " " << tipo << " " << tipotCasilla << endl;
+            tablero[posicion - 1] = tipotCasilla;
+            archivo >> posicion;
+        }
+        satisfactorio = true;
+        archivo.close();
+    }
+    return satisfactorio;
+}
+tCasilla stringAtCasilla(string casilla) {
+    tCasilla cadena = NORMAL;
+    if (casilla == "NORMAL") cadena = NORMAL;
+    else if (casilla == "OCA") cadena = OCA;
+    else if (casilla == "DADO1") cadena = DADO1;
+    else if (casilla == "DADO2") cadena = DADO2;
+    else if (casilla == "PUENTE1") cadena = PUENTE1;
+    else if (casilla == "PUENTE2") cadena = PUENTE2;
+    else if (casilla == "POSADA") cadena = POSADA;
+    else if (casilla == "CALAVERA") cadena = CALAVERA;
+    else if (casilla == "LABERINTO") cadena = LABERINTO;
+    else if (casilla == "POZO") cadena = POZO;
+    else if (casilla == "CARCEL") cadena = CARCEL;
+    //cout << casilla << " " << cadena << endl;
+    return cadena;
+}
+
 void iniciaJugadores(tJugadores jugadores, tJugadores penalizaciones) {
     //Situa a todos los jugadores en la casilla 1 (con index 0)
     for (int i = 0; i < NUM_JUGADORES; i++) {
@@ -160,18 +214,19 @@ void iniciaJugadores(tJugadores jugadores, tJugadores penalizaciones) {
         penalizaciones[i] = 0;
     }
 }
-int partida(tTablero tablero, tCasilla jugadores, tCasilla penalizaciones) {
+int partida(tTablero tablero, tJugadores jugadores, tJugadores penalizaciones) {
     int casillaActual = 0;
     int turno = quienEmpieza(); // Del 0 hasta NUM_JUGADORES - 1
     bool finPartida = false;
 
-    iniciaJugadores(tJugadores jugadores, tJugadores penalizaciones);
-    pintaTablero();
+    iniciaJugadores(jugadores, penalizaciones);
+    pintaTablero(tablero, jugadores);
 
     while (!finPartida) {        
         if (penalizaciones[turno] == 0) {
             tirada(tablero, casillaActual);
-            pintaTablero();
+            jugadores[turno] = casillaActual;
+            pintaTablero(tablero, jugadores);
             
             if (casillaActual >= 63) finPartida = true;
         }
@@ -200,43 +255,44 @@ int tirada(tTablero tablero, int& casillaActual){
 
     casillaActual += dado;
 
-    cout << "Has avanzado a la casilla " << casillaActual << endl;
+    cout << "Has avanzado a la casilla " << casillaActual + 1 << endl;
 
-    if (casillaActual < 63) {
+    if (casillaActual < 62) {
         penalizacion = efectoTirada(tablero, casillaActual);
     }
     
     return penalizacion;
 }
-
 int efectoTirada(tTablero tablero, int& casillaActual) {
     int penalizacion = 0;
+    
     casillaActual = saltaACasilla(tablero, casillaActual);
+
     switch(tablero[casillaActual]){
     case OCA:
         cout << "De oca a oca y tiro porque me toca" << endl;
         cout << "Avanzas hasta la casilla " << casillaActual << endl;
-        tirada(tablero, casillaActual);
+        penalizacion = tirada(tablero, casillaActual);
         break;
     case DADO1:
         cout << "De dado a dado y tiro porque me ha tocado" << endl;
         cout << "Avanzas hasta la casilla " << casillaActual << endl;
-        tirada(tablero, casillaActual);
+        penalizacion = tirada(tablero, casillaActual);
         break;
     case DADO2:
         cout << "De dado a dado y tiro porque me ha tocado" << endl;
         cout << "Retrocedes hasta la casilla " << casillaActual << endl;
-        tirada(tablero, casillaActual);
+        penalizacion = tirada(tablero, casillaActual);
         break;
     case PUENTE1:
         cout << "De puente a puente y tiro porque me lleva la corriente" << endl;
         cout << "Avanzas hasta la casilla " << casillaActual << endl;
-        tirada(tablero, casillaActual);
+        penalizacion = tirada(tablero, casillaActual);
         break;
     case PUENTE2:
         cout << "De puente a puente y tiro porque me lleva la corriente" << endl;
         cout << "Retrocedes hasta la casilla " << casillaActual << endl;
-        tirada(tablero, casillaActual);
+        penalizacion = tirada(tablero, casillaActual);
         break;
     case CALAVERA:
         cout << "Has caido en la muerte" << endl;
@@ -285,65 +341,12 @@ int tirarDadoManual() {
     return dado;
 }
 int quienEmpieza() {
-    int empieza = (rand() % NUM_JUG);
-    return empieza;
-}
-
-void iniciaTablero(tTablero tablero) { //Inicializa todo el tablero a normal excepto NUM_CASILLAS-1 que es la OCA 63
-    for (int i = 0; i < NUM_CASILLAS - 1; i++) {
-        tablero[i] = NORMAL;
-    }
-    tablero[NUM_CASILLAS - 1] = OCA;
-}
-bool cargaTablero(tTablero tablero) { 
-    ifstream archivo;
-    string nombre;
-    int posicion;
-    string tipo;
-    tCasilla tipotCasilla;
-    bool satisfactorio = false;
-
-    cout << "Introduce el nombre del fichero del tablero" << endl;
-    cin >> nombre;
-    archivo.open(nombre);
-
-    if (archivo.is_open()) {
-        archivo >> posicion;
-        while (posicion != CENTINELA) {
-            char aux;
-            archivo.get(aux);
-            getline(archivo, tipo);
-            tipotCasilla = stringAtCasilla(tipo);
-            //cout << posicion << " " << tipo << " " << tipotCasilla << endl;
-            tablero[posicion - 1] = tipotCasilla;
-            archivo >> posicion;
-        }
-        satisfactorio = true;
-        archivo.close();
-    }
-    return satisfactorio;
-}
-
-tCasilla stringAtCasilla(string casilla) {
-    tCasilla cadena = NORMAL;
-    if (casilla == "NORMAL") cadena = NORMAL;
-    else if (casilla == "OCA") cadena = OCA;
-    else if (casilla == "DADO1") cadena = DADO1;
-    else if (casilla == "DADO2") cadena = DADO2;
-    else if (casilla == "PUENTE1") cadena = PUENTE1;
-    else if (casilla == "PUENTE2") cadena = PUENTE2;
-    else if (casilla == "POSADA") cadena = POSADA;
-    else if (casilla == "CALAVERA") cadena = CALAVERA;
-    else if (casilla == "LABERINTO") cadena = LABERINTO;
-    else if (casilla == "POZO") cadena = POZO;
-    else if (casilla == "CARCEL") cadena = CARCEL;
-    //cout << casilla << " " << cadena << endl;
-    return cadena;
+    return rand() % NUM_JUGADORES;
 }
 
 int saltaACasilla(tTablero tablero, int casillaActual){
-  switch(tablero[casillaActual]){
-     case NORMAL:
+    switch(tablero[casillaActual]){
+    case NORMAL:
         casillaActual = casillaActual;
         break;
     case OCA:
@@ -367,10 +370,8 @@ int saltaACasilla(tTablero tablero, int casillaActual){
     case LABERINTO:
         casillaActual = buscaCasillaRetrocediendo(tablero, casillaActual);
         break;
-
-}
-
-  return casillaActual;
+    }
+    return casillaActual;
 }
 int buscaCasillaAvanzando(tTablero tablero,int casillaActual){
    if(tablero[casillaActual] == OCA){ 
@@ -391,7 +392,6 @@ int buscaCasillaAvanzando(tTablero tablero,int casillaActual){
    return casillaActual;
 
 }
-
 int buscaCasillaRetrocediendo(tTablero tablero, int casillaActual){
    if(tablero[casillaActual] == PUENTE2){ 
        while(tablero[casillaActual]!= PUENTE1){
