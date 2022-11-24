@@ -420,7 +420,6 @@ int buscaCasillaRetrocediendo(tTablero tablero, int casillaActual){
 
 
 
-
 //-----------------------------------------CODIGO UTIL PARA USAR DESPUES-----------------------------------------//
 
 //Funcion de cambio de turno no usada en la v1
