@@ -147,46 +147,44 @@ int efectoTirada(tTablero tablero, int& casillaActual) {
     if (casillaActual < NUM_CASILLAS - 1) {
         switch (tablero[casillaActual]) {
         case OCA:
+            cout << "De oca a oca y tiro porque me toca" << endl;
+            casillaActual = saltaACasilla(tablero, casillaActual);
             if (casillaActual < NUM_CASILLAS - 1) {
-                cout << "De oca a oca y tiro porque me toca" << endl;
-                casillaActual = saltaACasilla(tablero, casillaActual);
-                cout << "Avanzas hasta la casilla " << casillaActual + 1 << endl;
+                cout << "Vuelves a tirar" << endl;
                 penalizacion = tirada(tablero, casillaActual);
             }
             break;
         case DADO1:
             cout << "De dado a dado y tiro porque me ha tocado" << endl;
             casillaActual = saltaACasilla(tablero, casillaActual);
-            cout << "Avanzas hasta la casilla " << casillaActual + 1 << endl;
+            cout << "Vuelves a tirar" << endl;
             penalizacion = tirada(tablero, casillaActual);
             break;
         case DADO2:
             cout << "De dado a dado y tiro porque me ha tocado" << endl;
             casillaActual = saltaACasilla(tablero, casillaActual);
-            cout << "Retrocedes hasta la casilla " << casillaActual + 1 << endl;
+            cout << "Vuelves a tirar" << endl;
             penalizacion = tirada(tablero, casillaActual);
             break;
         case PUENTE1:
             cout << "De puente a puente y tiro porque me lleva la corriente" << endl;
             casillaActual = saltaACasilla(tablero, casillaActual);
-            cout << "Avanzas hasta la casilla " << casillaActual + 1 << endl;
+            cout << "Vuelves a tirar" << endl;
             penalizacion = tirada(tablero, casillaActual);
             break;
         case PUENTE2:
             cout << "De puente a puente y tiro porque me lleva la corriente" << endl;
             casillaActual = saltaACasilla(tablero, casillaActual);
-            cout << "Retrocedes hasta la casilla " << casillaActual + 1 << endl;
+            cout << "Vuelves a tirar" << endl;
             penalizacion = tirada(tablero, casillaActual);
             break;
         case CALAVERA:
             cout << "Has caido en la muerte" << endl;
             casillaActual = saltaACasilla(tablero, casillaActual);
-            cout << "Vuelve a la casilla" << casillaActual + 1 << endl;
             break;
         case LABERINTO:
-            cout << "Has caido en el laberinto" << endl;
             casillaActual = saltaACasilla(tablero, casillaActual);
-            cout << "Retrocedes hasta " << casillaActual + 1 << endl;
+            cout << "Has caido en el laberinto" << endl;
             break;
         case POSADA:
             cout << "Has caido en la posada" << endl;
@@ -221,16 +219,20 @@ int saltaACasilla(tTablero tablero, int casillaActual) {
     case DADO1:
     case PUENTE1:
         casillaActual = buscaCasillaAvanzando(tablero, casillaActual);
+        cout << "Avanzas hasta la casilla " << casillaActual + 1 << endl;
         break;
     case DADO2:
     case PUENTE2:
         casillaActual = buscaCasillaRetrocediendo(tablero, casillaActual);
+        cout << "Retrocedes hasta la casilla " << casillaActual + 1 << endl;
         break;
     case CALAVERA:
         casillaActual = 0;
+        cout << "Vuelves a la casilla" << casillaActual + 1 << endl;
         break;
     case LABERINTO:
         casillaActual -= 12;
+        cout << "Retrocedes hasta " << casillaActual + 1 << endl;
         break;
     }
     return casillaActual;
