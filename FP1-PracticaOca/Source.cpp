@@ -57,7 +57,7 @@ int main() {
     
     //Inicializa el tablero a NORMAL y carga el tablero del archivo a introducir
     iniciaTablero(tablero);
-    while (!cargaTablero(tablero)) cout << "Ha ocurrido un error al abrir el archivo";
+    while (!cargaTablero(tablero)) cout << "Ha ocurrido un error al abrir el archivo" << endl;
 
     cout << "El ganador de la partida es el jugador " << partida(tablero, jugadores, penalizaciones) + 1 << endl;
     return 0;
@@ -170,7 +170,7 @@ bool cargaTablero(tTablero tablero) {
     tCasilla tipotCasilla;
     bool satisfactorio = false;
 
-    cout << "Introduce el nombre del fichero del tablero" << endl;
+    cout << "Introduce el nombre del fichero del tablero: ";
     cin >> nombre;
     archivo.open(nombre);
 
@@ -219,8 +219,10 @@ int partida(tTablero tablero, tJugadores jugadores, tJugadores penalizaciones) {
     int turno = quienEmpieza(); // Del 0 hasta NUM_JUGADORES - 1
     bool finPartida = false;
 
+
     iniciaJugadores(jugadores, penalizaciones);
     pintaTablero(tablero, jugadores);
+    cout << "Empieza el jugador " << turno + 1 << endl;
 
     while (!finPartida) {        
         if (penalizaciones[turno] == 0) {
@@ -233,12 +235,13 @@ int partida(tTablero tablero, tJugadores jugadores, tJugadores penalizaciones) {
         else penalizaciones[turno]--;
         
         if (!finPartida) {
-            if (turno != NUM_JUGADORES && !finPartida) {
+            if (turno != NUM_JUGADORES - 1 && !finPartida) {
                 turno++;
-                casillaActual = jugadores[turno];
             }
             else turno = 0;
         }
+        casillaActual = jugadores[turno];
+        cout << "Es el turno del jugador " << turno + 1 << endl;
     }
     return turno;
 }
@@ -246,6 +249,7 @@ int tirada(tTablero tablero, int& casillaActual){
 
     int dado;
     int penalizacion = 0;
+
     
     //Tira dados
     if (!MODO_DEBUG) dado = tirarDado();
@@ -265,9 +269,7 @@ int tirada(tTablero tablero, int& casillaActual){
 }
 int efectoTirada(tTablero tablero, int& casillaActual) {
     int penalizacion = 0;
-    
     casillaActual = saltaACasilla(tablero, casillaActual);
-
     switch(tablero[casillaActual]){
     case OCA:
         cout << "De oca a oca y tiro porque me toca" << endl;
@@ -374,18 +376,19 @@ int saltaACasilla(tTablero tablero, int casillaActual){
     return casillaActual;
 }
 int buscaCasillaAvanzando(tTablero tablero,int casillaActual){
-   if(tablero[casillaActual] == OCA){ 
-    while(tablero[casillaActual + 1]!= OCA){
-        casillaActual++;
-    }
+   if (tablero[casillaActual] == OCA){ 
+       casillaActual++;
+       while(tablero[casillaActual] != OCA){
+           casillaActual++;
+       }
    }
-   else if(tablero[casillaActual] == PUENTE1){
+   else if (tablero[casillaActual] == PUENTE1){
        while(tablero[casillaActual] != PUENTE2){
            casillaActual++;
        }
    }
-   else{
-       while(tablero[casillaActual] != DADO2){
+   else {
+       while (tablero[casillaActual] != DADO2){
            casillaActual++;
        }
    }
