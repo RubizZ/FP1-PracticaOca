@@ -6,7 +6,7 @@
 
 using namespace std;
 
-const int MODO_DEBUG = true;
+const int MODO_DEBUG = false;
 
 const int CASILLA_INICIAL = 1;
 const int NUM_CASILLAS = 63;
@@ -332,9 +332,7 @@ int tirarDado() {
     //Guarda todo lo que el usuario escribe en una string basura i hasta que le da al enter para pasar a la siguiente instruccion
     getline(cin, i);
 
-    int dado = (rand() % 6) + 1;
-    cout << "Has sacado un " << dado << endl;
-    return dado;
+    return (rand() % 6) + 1;
 }
 int tirarDadoManual() {
     int dado = 0;
@@ -393,7 +391,6 @@ int buscaCasillaAvanzando(tTablero tablero,int casillaActual){
        }
    }
    return casillaActual;
-
 }
 int buscaCasillaRetrocediendo(tTablero tablero, int casillaActual){
    if(tablero[casillaActual] == PUENTE2){ 
@@ -407,14 +404,13 @@ int buscaCasillaRetrocediendo(tTablero tablero, int casillaActual){
        } 
    }
    else if(tablero[casillaActual] == CALAVERA){
-       casillaActual = 1;
+       casillaActual = 0;
    }
    else{
-       casillaActual = casillaActual - 12;
+       casillaActual -= 12;
    }
    
    return casillaActual;
-
 }
 
 
