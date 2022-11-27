@@ -126,7 +126,6 @@ int partida(const tTablero tablero) {
 }
 int tirada(const tTablero tablero, int& casillaActual) {
     int dado;
-    int penalizacion = 0;
 
     //Tira dados
     if (!MODO_DEBUG) {
@@ -140,10 +139,8 @@ int tirada(const tTablero tablero, int& casillaActual) {
     cout << "Estas en la casilla " << casillaActual + 1 << endl;
 
     if (casillaActual < NUM_CASILLAS - 1) {
-        penalizacion = efectoTirada(tablero, casillaActual);
+        efectoTirada(tablero, casillaActual, penalizacion);
     }
-
-    return penalizacion;
 }
 int efectoTirada(const tTablero tablero, int& casillaActual) {
     int penalizacion = 0;
