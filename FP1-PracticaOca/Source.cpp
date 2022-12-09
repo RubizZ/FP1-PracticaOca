@@ -68,6 +68,17 @@ int tirarDadoManual();
 int partida(tEstadoPartida& estado);
 void pintaTablero(const tEstadoPartida& partida);
 
+//Funciones nuevas
+bool cargaPartidas(tListaPartidas& partidas);
+void cargaTablero(tTablero tablero, ifstream& archivo);
+void cargaJugadores(tEstadoJugadores& jugadores, ifstream& archivo);
+void eliminarPartida(tListaPartidas& partidas, int indice);
+bool insertaNuevaPartida(tListaPartidas& partidas, const tEstadoPartida& partidaOca);
+void guardaPartidas(const tListaPartidas& partidas);
+void guardaTablero(const tTablero tablero, ofstream& archivo);
+void guardaJugadores(const tEstadoJugadores jugadores, ofstream& archivo);
+
+
 int main() { //Hay que cambiar esto para los structs y lo de abandonar partida
     srand(time(NULL));
     tTablero tablero;
@@ -427,3 +438,56 @@ string casillaAstring(tCasilla casilla) {
      }
      return cadena;
  }
+bool cargaPartidas(tListaPartidas& partidas) {
+    ifstream archivo;
+    string nombre;
+    int numPartidas;
+    string tipo;
+    tCasilla tipotCasilla;
+    bool satisfactorio = false;
+
+    cout << "Introduce el nombre del fichero de partidas: ";
+    getline(cin, nombre);
+
+    archivo.open(nombre);
+
+    if (archivo.is_open()) {
+        archivo >> numPartidas;
+        partidas.cont = numPartidas;
+        if (numPartidas >= 1) {
+            for (int i = 0; i++; i < numPartidas) {
+                cargaTablero(partidas.listaPartidas[i].tablero, archivo);
+                cargaJugadores(partidas.listaPartidas[i].estadoJug, archivo);
+            }
+        }
+        else {
+            cout << "No hay partidas guardadas";
+        }
+        satisfactorio = true;
+        archivo.close();
+    }
+    return satisfactorio;
+}
+void cargaTablero(tTablero tablero, ifstream& archivo) {
+    int posicion;
+    string tipo;
+    tCasilla tipotCasilla;
+    archivo >> posicion;
+    while (posicion != CENTINELA) {
+        char aux;
+        archivo.get(aux);
+        getline(archivo, tipo);
+        tipotCasilla = stringAtCasilla(tipo);
+        tablero[posicion - 1] = tipotCasilla;
+        archivo >> posicion;
+    }
+}
+void cargaJugadores(tEstadoJugadores& jugadores, ifstream& archivo) {
+    for (int i = 0; i++; i < NUM_JUGADORES) {
+        archivo >> jugadores[i].casilla;
+        archivo >> jugadores[i].penalizaciones;
+    }
+}
+void eliminarPartida(tListaPartidas& partidas, int indice) {
+
+}
