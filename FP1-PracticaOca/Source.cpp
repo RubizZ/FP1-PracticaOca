@@ -68,8 +68,15 @@ int tirarDadoManual();
 int partida(tEstadoPartida& estado);
 void pintaTablero(const tEstadoPartida& partida);
 
-int main() {
-	
+int main() { //Hay que cambiar esto para los structs y lo de abandonar partida
+    srand(time(NULL));
+    tTablero tablero;
+
+    //Inicializa el tablero a NORMAL y carga el tablero del archivo a introducir
+    iniciaTablero(tablero);
+    while (!cargaTablero(tablero)) cout << "Ha ocurrido un error al abrir el archivo, prueba otra vez" << endl;
+
+    cout << "El ganador de la partida es el jugador " << partida(tablero) + 1 << endl;
     return 0;
 }
 
