@@ -87,17 +87,17 @@ void eliminarPartida(tListaPartidas& partidas, int indice);
 void guardaPartidas(const tListaPartidas& partidas);
 void guardaTablero(const tTablero tablero, ofstream& archivo);
 void guardaJugadores(const tEstadoJugadores jugadores, const int numJugadores, ofstream& archivo);
+void creaPartidaNueva(tEstadoPartida partida);
 
 
 int main() { //IMPORTANTE CAMBIAR TODAS LAS CONSTANTES NUM_JUGADORES a numJugadores que esta almacenado en partidas.listaPartidas[].numJugadores <---------------------------
     srand(time(NULL));
     
     tListaPartidas partidas;
-    int opcion, indexPartida;
+    int opcion, indexPartida = -1;
     bool acabada = true;
 
-    cargaPartidas(partidas);
-    cout << "Quieres empezar una nueva o continuar una antigua?\n1. Nueva partida\n2. Cargar partida\n3. Salir\n\n-> ";
+    cout << "Quieres empezar una nueva partida o continuar una antigua?\n1. Nueva partida\n2. Cargar partida\n3. Salir\n\n-> ";
     cin >> opcion;
     while (opcion < 1 || opcion > 3) {
         cout << "Esa opcion no es valida, escribe un numero del 1 al 3\n\n-> ";
@@ -107,35 +107,40 @@ int main() { //IMPORTANTE CAMBIAR TODAS LAS CONSTANTES NUM_JUGADORES a numJugado
     cin.get(aux);
     switch (opcion) {
     case 1:
-        if (partidas.cont < MAX_PARTIDAS) {
-            indexPartida = partidas.cont; //Posicion del primer index vacio y cambiado a otra variable para que sea mas legible
-            
-            cout << "Cuantos jugadores (" << MIN_JUGADORES << "-" << MAX_JUGADORES << ") van a jugar la partida? ";
-            cin >> partidas.listaPartidas[indexPartida].numJugadores;
-            while (partidas.listaPartidas[indexPartida].numJugadores < MIN_JUGADORES || partidas.listaPartidas[indexPartida].numJugadores > MAX_JUGADORES) {
-                cout << "Introduce un numero entre " << MIN_JUGADORES << " y " << MAX_JUGADORES;
-                cin >> partidas.listaPartidas[indexPartida].numJugadores;
-            }
-            iniciaJugadores(partidas.listaPartidas[indexPartida].estadoJug, partidas.listaPartidas[indexPartida].numJugadores);
-            
-            iniciaTablero(partidas.listaPartidas[indexPartida].tablero);
-            cout << "Introduce el nombre del fichero del tablero: ";
-            getline(cin, partidas.listaPartidas[indexPartida].nombreTablero);
-            while (!cargaTableroNuevo(partidas.listaPartidas[indexPartida].tablero, partidas.listaPartidas[indexPartida].nombreTablero)) {
-                cout << "Ha ocurrido un error al abrir el archivo, prueba otra vez" << endl;
-                getline(cin, partidas.listaPartidas[indexPartida].nombreTablero);
-            }
-
+        int input;
+        cout << "\nQuieres cargar un fichero de partidas? (Esta partida se gurdara en el primer slot disponible)\n1. Continuar sin fichero\n2. Cargar fichero\n\n-> ";
+        cin >> input;
+        while (opcion < 1 || opcion > 2) {
+            cout << "Esa opcion no es valida, escribe un numero del 1 al 2\n\n-> ";
+            cin >> opcion;
+        }
+        switch (input) {
+        case 1:
+            partidas.cont = 0;
+            indexPartida = partidas.cont;
+            creaPartidaNueva(partidas.listaPartidas[indexPartida]);
+            partidas.cont++;
             acabada = partida(partidas.listaPartidas[indexPartida]);
-        }
-        else {
-            cout << "Hay el maximo (" << MAX_PARTIDAS << ") de partidas guardadas, termina una de las anteriores para crear otra nueva";
-            acabada = true;
-        }
+            break;
+        case 2:
+            while (!cargaPartidas(partidas)) cout << "No se han podido cargar las partidas" << endl;
 
+            if (partidas.cont < MAX_PARTIDAS) {
+                indexPartida = partidas.cont; //Posicion del primer index vacio y cambiado a otra variable para que sea mas legible
+                creaPartidaNueva(partidas.listaPartidas[indexPartida]);
+                partidas.cont++;
+                acabada = partida(partidas.listaPartidas[indexPartida]);
+            }
+            else {
+                cout << "Hay el maximo (" << MAX_PARTIDAS << ") de partidas guardadas, termina una de las anteriores para crear otra nueva";
+                acabada = true;
+            }
+            break;
+        }
         break;
     case 2:
-        cout << "Que partida quieres continuar? 1-" << partidas.cont << endl;
+        while (!cargaPartidas(partidas)) cout << "No se han podido cargar las partidas" << endl;
+        cout << "Que partida quieres continuar? 1-" << partidas.cont << "\n\n-> ";
         for (int i = 0; i < partidas.cont; i++) {
             cout << "Partida " << i + 1 << ": " << partidas.listaPartidas[i].numJugadores << "jugadores en el tablero " << partidas.listaPartidas[i].nombreTablero;
         }
@@ -521,7 +526,7 @@ bool cargaPartidas(tListaPartidas& partidas) {
     string nombre;
     bool satisfactorio = false;
 
-    cout << "Introduce el nombre del fichero de partidas: ";
+    cout << "Escribe el nombre del archivo de partidas, si no existe se creara\n\n-> ";
     getline(cin, nombre);
 
     archivo.open(nombre);
@@ -537,12 +542,15 @@ bool cargaPartidas(tListaPartidas& partidas) {
                 archivo >> partidas.listaPartidas[i].turno;
                 partidas.listaPartidas[i].numJugadores = cargaJugadores(partidas.listaPartidas[i].estadoJug, archivo);
             }
+            satisfactorio = true;
         }
         else {
-            cout << "No hay partidas guardadas";
+            cout << "Este fichero no es un archivo de partidas, borralo o cambiale el nombre";
         }
-        satisfactorio = true;
         archivo.close();
+    }
+    else {
+        cout << "No existe el archivo" << nombre << endl;
     }
     return satisfactorio;
 }
@@ -620,7 +628,26 @@ void guardaJugadores(const tEstadoJugadores jugadores, const int numJugadores, o
         archivo << jugadores[numJugador].casilla << " " << jugadores[numJugador].penalizaciones << endl;
         numJugador++;
     }
-    archivo << CENTINELA_2 << endl;
+    archivo << CENTINELA_2 << endl;                           
+}
+void creaPartidaNueva(tEstadoPartida partida) {
+    cout << "\nCuantos jugadores (" << MIN_JUGADORES << "-" << MAX_JUGADORES << ") van a jugar la partida? \n\n-> ";
+    cin >> partida.numJugadores;
+    string aux;
+    getline(cin, aux);
+    while (partida.numJugadores < MIN_JUGADORES || partida.numJugadores > MAX_JUGADORES) {
+        cout << "\nIntroduce un numero entre " << MIN_JUGADORES << " y " << MAX_JUGADORES << "\n\n-> ";
+        cin >> partida.numJugadores;
+    }
+    iniciaJugadores(partida.estadoJug, partida.numJugadores);
+
+    iniciaTablero(partida.tablero);
+    cout << "\nIntroduce el nombre del fichero del tablero: \n\n-> ";
+    getline(cin, partida.nombreTablero);
+    while (!cargaTableroNuevo(partida.tablero, partida.nombreTablero)) {
+        cout << "\nHa ocurrido un error al abrir el archivo, prueba otra vez\n\n-> ";
+        getline(cin, partida.nombreTablero);
+    }
 }
 
 
