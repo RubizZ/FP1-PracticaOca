@@ -87,7 +87,7 @@ void eliminarPartida(tListaPartidas& partidas, int indice);
 void guardaPartidas(const tListaPartidas& partidas);
 void guardaTablero(const tTablero tablero, ofstream& archivo);
 void guardaJugadores(const tEstadoJugadores jugadores, const int numJugadores, ofstream& archivo);
-void creaPartidaNueva(tEstadoPartida partida);
+void creaPartidaNueva(tEstadoPartida& partida);
 
 
 int main() { //IMPORTANTE CAMBIAR TODAS LAS CONSTANTES NUM_JUGADORES a numJugadores que esta almacenado en partidas.listaPartidas[].numJugadores <---------------------------
@@ -96,23 +96,25 @@ int main() { //IMPORTANTE CAMBIAR TODAS LAS CONSTANTES NUM_JUGADORES a numJugado
     tListaPartidas partidas;
     int opcion, indexPartida = -1;
     bool acabada = true;
+    char aux;
 
     cout << "Quieres empezar una nueva partida o continuar una antigua?\n1. Nueva partida\n2. Cargar partida\n3. Salir\n\n-> ";
     cin >> opcion;
     while (opcion < 1 || opcion > 3) {
-        cout << "Esa opcion no es valida, escribe un numero del 1 al 3\n\n-> ";
+        cout << "\nEsa opcion no es valida, escribe un numero del 1 al 3\n\n-> ";
         cin >> opcion;
     }
-    char aux;
     cin.get(aux);
     switch (opcion) {
     case 1:
         int input;
         cout << "\nQuieres cargar un fichero de partidas? (Esta partida se gurdara en el primer slot disponible)\n1. Continuar sin fichero\n2. Cargar fichero\n\n-> ";
         cin >> input;
+        cin.get(aux);
         while (opcion < 1 || opcion > 2) {
-            cout << "Esa opcion no es valida, escribe un numero del 1 al 2\n\n-> ";
+            cout << "\nEsa opcion no es valida, escribe un numero del 1 al 2\n\n-> ";
             cin >> opcion;
+            cin.get(aux);
         }
         switch (input) {
         case 1:
@@ -236,7 +238,7 @@ void tirada(const tTablero tablero, tEstadoJugador& estadoJug) {
 void efectoTirada(const tTablero tablero, tEstadoJugador& estadoJug) {
     tCasilla tipo;
     if (estadoJug.casilla < NUM_CASILLAS - 1) {
-        switch (tablero[estadoJug.casilla]) {
+        switch (tablero[estadoJug.casilla]) { //Algo pasa en el struct que tiene el array del tablero <-----------------------------------------
         case OCA:
             cout << "De oca a oca y tiro porque me toca" << endl;
             estadoJug.casilla = saltaACasilla(tablero, estadoJug.casilla);
@@ -292,14 +294,6 @@ void cambioDeTurno(int& turno, const int numJugadores) {
 
 //Funciones del dado
 int tirarDado() {
-    string i;
-
-    //Pregunta para que el usuario "tire" un dado, no siguiendo con el codigo hasta que pulse enter
-    cout << "Pulsa enter para tirar el dado";
-
-    //Guarda todo lo que el usuario escribe en una string basura i hasta que le da al enter para pasar a la siguiente instruccion
-    getline(cin, i);
-
     return (rand() % 6) + 1;
 }
 int tirarDadoManual() {
@@ -355,10 +349,10 @@ tCasilla stringAtCasilla(string casilla) {
     else if (casilla == "CARCEL") cadena = CARCEL;
     return cadena;
 }
-void iniciaJugadores(tEstadoJugadores jugadores, int numJugadores) {
-    for (int i = 0; i < numJugadores; i++) {
-        jugadores[i].casilla = 0;
-        jugadores[i].penalizaciones = 0;
+void iniciaJugadores(tEstadoPartida partida) {
+    for (int i = 0; i < partida.numJugadores; i++) {
+        partida.estadoJug[i].casilla = 0;
+        partida.estadoJug[i].penalizaciones = 0;
     }
 }
 int quienEmpieza(int max) {
@@ -630,19 +624,20 @@ void guardaJugadores(const tEstadoJugadores jugadores, const int numJugadores, o
     }
     archivo << CENTINELA_2 << endl;                           
 }
-void creaPartidaNueva(tEstadoPartida partida) {
+void creaPartidaNueva(tEstadoPartida& partida) {
+    char aux;
     cout << "\nCuantos jugadores (" << MIN_JUGADORES << "-" << MAX_JUGADORES << ") van a jugar la partida? \n\n-> ";
     cin >> partida.numJugadores;
-    string aux;
-    getline(cin, aux);
+    cin.get(aux);
     while (partida.numJugadores < MIN_JUGADORES || partida.numJugadores > MAX_JUGADORES) {
         cout << "\nIntroduce un numero entre " << MIN_JUGADORES << " y " << MAX_JUGADORES << "\n\n-> ";
         cin >> partida.numJugadores;
+        cin.get(aux);
     }
-    iniciaJugadores(partida.estadoJug, partida.numJugadores);
+    iniciaJugadores(partida);
 
     iniciaTablero(partida.tablero);
-    cout << "\nIntroduce el nombre del fichero del tablero: \n\n-> ";
+    cout << "\nIntroduce el nombre del tablero: \n\n-> ";
     getline(cin, partida.nombreTablero);
     while (!cargaTableroNuevo(partida.tablero, partida.nombreTablero)) {
         cout << "\nHa ocurrido un error al abrir el archivo, prueba otra vez\n\n-> ";
