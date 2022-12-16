@@ -67,7 +67,7 @@ void pintaBorde(int casillasPorFila);
 string casillaAstring(tCasilla casilla);
 
 //Funciones modificadas
-void iniciaJugadores(tEstadoJugadores& jugadores, int numJugadores);
+void iniciaJugadores(tEstadoPartida& partida);
 void efectoTirada(const tTablero tablero, tEstadoJugador& estadoJug);
 void tirada(const tTablero tablero, tEstadoJugador& estadoJug);
 int tirarDado();
@@ -75,7 +75,7 @@ int tirarDadoManual();
 bool partida(tEstadoPartida& estado);
 void pintaTablero(const tEstadoPartida& partida);
 void pintaTipoCasilla(const tTablero tablero, int fila, int casillasPorFila);
-void pintaJugadores(const tEstadoPartida estado, int fila, int casillasPorFila);
+void pintaJugadores(const tEstadoPartida estado, int fila, int casillasPorFil);
 void cambioDeTurno(int& turno, const int numJugadores);
 
 //Funciones nuevas
@@ -83,7 +83,7 @@ bool cargaPartidas(tListaPartidas& partidas);
 void cargaTablero(tTablero tablero, ifstream& archivo);
 int cargaJugadores(tEstadoJugadores& jugadores, ifstream& archivo);
 void eliminarPartida(tListaPartidas& partidas, int indice);
-bool insertaNuevaPartida(tListaPartidas& partidas, const tEstadoPartida& partidaOca); //FALTA HACERLA PARA EL CASE 1 DEL CASE 1 DEL MAIN, USARA LAS FUNCIONES cargaPartidas Y guardaPartidas
+void insertaNuevaPartida(tListaPartidas& partidas, const tEstadoPartida& partidaNueva); //FALTA HACERLA PARA EL CASE 1 DEL CASE 1 DEL MAIN, USARA LAS FUNCIONES cargaPartidas Y guardaPartidas
 void guardaPartidas(const tListaPartidas& partidas);
 void guardaTablero(const tTablero tablero, ofstream& archivo); //POR ALGUN CASUAL ME HA GUARDADO TODAS LAS CASILLAS ESPECIALES COMO OCA AL CONTINUAR UNA PARTIDA, VER POR QUE PASA ESTO
 void guardaJugadores(const tEstadoJugadores jugadores, const int numJugadores, ofstream& archivo);
@@ -93,9 +93,9 @@ void creaPartidaNueva(tEstadoPartida& partida);
 int main() {
     srand(time(NULL));
     
-    tListaPartidas partidas;
-    int opcion, indexPartida = -1;
-    bool acabada = true;
+    tEstadoPartida partidaNueva;
+
+    int opcion;
     char aux;
 
     cout << "Quieres empezar una nueva partida o continuar una antigua?\n1. Nueva partida\n2. Cargar partida\n3. Salir\n\n-> ";
@@ -103,48 +103,37 @@ int main() {
     while (opcion < 1 || opcion > 3) {
         cout << "\nEsa opcion no es valida, escribe un numero del 1 al 3\n\n-> ";
         cin >> opcion;
-    }
-    cin.get(aux);
-    switch (opcion) {
-    case 1: //HAY QUE CAMBIAR ESTO PARA QUE NO CARGE PARTIDAS Y SIMPLEMENTE SE JUEGUE Y SE GUARDE AL FINAL, ENTONCES EN EL CASE 2 SE DECLARA UN tListaPartidas Y AQUI UN tEstadoPartida
-            //Y ASI SE CARGAN LAS PARTIDAS SOLO SI SE VA A GUARDAR UNA NUEVA
-        int input; 
-        cout << "\nQuieres cargar un fichero de partidas? (Esta partida se gurdara en el primer slot disponible si no se termina)\n1. Cargar fichero\n2. Continuar sin fichero\n\n-> ";
-        cin >> input;
         cin.get(aux);
-        while (opcion < 1 || opcion > 2) {
-            cout << "\nEsa opcion no es valida, escribe un numero del 1 al 2\n\n-> ";
-            cin >> opcion;
-            cin.get(aux);
-        }
-        
-        switch (input) { //TAMBIEN CAMBIAR ESTE SWITCH AL FINAL DEL PROGRAMA SI NO SE HA TERMINADO LA PARTIDA
-        case 1: 
-            while (!cargaPartidas(partidas)) cout << "No se han podido cargar las partidas" << endl;
-            if (partidas.cont < MAX_PARTIDAS) {
-                indexPartida = partidas.cont; //Posicion del primer index vacio y cambiado a otra variable para que sea mas legible
-                creaPartidaNueva(partidas.listaPartidas[indexPartida]);
-                partidas.cont++;
-                acabada = partida(partidas.listaPartidas[indexPartida]);
+    }
+    switch (opcion) {
+    case 1:
+        creaPartidaNueva(partidaNueva);
+        if (!partida(partidaNueva)) {
+            tListaPartidas partidas;
+
+            if (!cargaPartidas(partidas)) {
+                cout << "Se va a crear un archivo de guardado nuevo" << endl;
+                partidas.cont = 1;
             }
             else {
-                cout << "Hay el maximo (" << MAX_PARTIDAS << ") de partidas guardadas, termina una de las anteriores para crear otra nueva";
-                acabada = true;
+                if (partidas.cont == 1) cout << endl << "Hay " << partidas.cont << " partida guardadas" << endl;
+                else cout << endl << "Hay " << partidas.cont << " partidas guardadas" << endl;
             }
-            break;
-        case 2:
-            partidas.cont = 0;
-            indexPartida = partidas.cont;
-            creaPartidaNueva(partidas.listaPartidas[indexPartida]);
-            partidas.cont++;
-            acabada = partida(partidas.listaPartidas[indexPartida]);
-            break;
+            insertaNuevaPartida(partidas, partidaNueva);
+
+            cout << "\n\nLa partida se va a guardar en el slot " << partidas.cont << endl;
+
+            guardaPartidas(partidas);
         }
         break;
-    case 2: //HAY QUE HACER QUE ESTE CASE GUARDE LAS PARTIDAS EN EL MISMO FICHEREO QUE LAS ABRIO
+    case 2:
+        tListaPartidas partidas;
+        int indexPartida;
+        
         while (!cargaPartidas(partidas)) cout << "No se han podido cargar las partidas" << endl;
         if (partidas.cont == 1) cout << endl << "Hay " << partidas.cont << " partida guardadas" << endl;
         else cout << endl << "Hay " << partidas.cont << " partidas guardadas" << endl;
+        
         cout << "Que partida quieres continuar?" << endl;
         for (int i = 0; i < partidas.cont; i++) {
             cout << i + 1 << ". " << partidas.listaPartidas[i].numJugadores << " jugadores en el tablero " << partidas.listaPartidas[i].nombreTablero << endl;
@@ -154,23 +143,23 @@ int main() {
         indexPartida--;
         char aux;
         cin.get(aux);
-        acabada = partida(partidas.listaPartidas[indexPartida]);
-        break;
-    }
-    if (opcion != 3) { //CAMBIAR ESTO PORQUE DEPENDE DE opcion TENDRA QUE HACER UNA COSA U OTRA, EXPLICADO EN LOS COMENTARIOS DE ARRIBA
-        if (!acabada) {
-            guardaPartidas(partidas);
-            if (opcion == 1) cout << endl << "La partida se va a guardar en el slot " << indexPartida + 1 << endl;
-            else cout << endl << "La partida del slot " << indexPartida + 1 << " se ha actualizado" << endl;
-        }
-        else {
-            eliminarPartida(partidas, indexPartida); //SOLO NECESARIO CUANDO opcion ES 2
+        if (partida(partidas.listaPartidas[indexPartida])) {
+            eliminarPartida(partidas, indexPartida);
             if (partidas.cont >= 1) guardaPartidas(partidas);
             else cout << "No hay partidas a guardar, terminando el programa";
         }
+        else {
+            guardaPartidas(partidas);
+            cout << endl << "La partida del slot " << indexPartida + 1 << " se ha actualizado" << endl;
+        }
+        break;
+    }
+    if (opcion == 3) {
+        cout << "Saliendo del programa" << endl;
     }
     return 0;
 }
+    
 
 //Funciones principales
 bool partida(tEstadoPartida& partida) {
@@ -250,7 +239,7 @@ void tirada(const tTablero tablero, tEstadoJugador& estadoJug) {
 void efectoTirada(const tTablero tablero, tEstadoJugador& estadoJug) {
     tCasilla tipo;
     if (estadoJug.casilla < NUM_CASILLAS - 1) {
-        switch (tablero[estadoJug.casilla]) { //Algo pasa en el struct que tiene el array del tablero <-----------------------------------------
+        switch (tablero[estadoJug.casilla]) {
         case OCA:
             cout << "De oca a oca y tiro porque me toca" << endl;
             estadoJug.casilla = saltaACasilla(tablero, estadoJug.casilla);
@@ -611,7 +600,6 @@ void guardaPartidas(const tListaPartidas& partidas){
         getline(cin, nombre);
         archivo.open(nombre);
     }
-    
     archivo << partidas.cont << endl;
     for (int i = 0; i < partidas.cont; i++) {
         archivo << partidas.listaPartidas[i].nombreTablero << endl;
@@ -660,6 +648,9 @@ void creaPartidaNueva(tEstadoPartida& partida) {
         cout << "\nHa ocurrido un error al abrir el archivo, prueba otra vez\n\n-> ";
         getline(cin, partida.nombreTablero);
     }
+}
+void insertaNuevaPartida(tListaPartidas& partidas, const tEstadoPartida& partidaNueva) {
+    partidas.listaPartidas[partidas.cont] = partidaNueva;
 }
 
 
